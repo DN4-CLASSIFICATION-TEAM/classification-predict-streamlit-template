@@ -37,7 +37,7 @@ raw = pd.read_csv("resources/train.csv")
 
 # The main function where we will build the actual app
 def main():
-	"""Tweet Classifier App with Streamlit """
+	"""DN4 Tweet Classifier App with Streamlit """
 
 	# Creates a main title and subheader on your page -
 	# these are static across all pages
