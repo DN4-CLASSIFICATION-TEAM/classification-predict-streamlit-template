@@ -25,11 +25,24 @@
 import streamlit as st
 from PIL import Image
 import joblib
+from pages import home, modeling, aboutUs
 
+# Create a dictionary to map page names to their respective modules
+pages = {
+    "Home": home,
+    "Modeling": modeling,
+    "about Us": aboutUs,
+}
 
 # The main function where we will build the actual app
 def main():
     """Tweet Classifier App with Streamlit """
+    # Add a sidebar to navigate between pages
+    selection = st.sidebar.radio("Navigation", list(pages.keys()))
+
+    # Render the selected page
+    page = pages[selection]
+    page.render()
     image = Image.open("./resources/imgs/dn4logo.png")
     st.sidebar.image(image, width=200)
     st.title("Welcome to Sense Solutions!")
