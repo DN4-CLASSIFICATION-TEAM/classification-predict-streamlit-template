@@ -1,6 +1,6 @@
 matplotlib
 joblib
-PIL
+Pillow
 wordcloud
 nltk
 scikit-learn
