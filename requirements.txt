@@ -1,7 +1,7 @@
-streamlit
 matplotlib
 joblib
 PIL
 wordcloud
 nltk
 scikit-learn
+streamlit
