@@ -25,13 +25,13 @@
 import streamlit as st
 from PIL import Image
 import joblib
-from pages import home, modeling, aboutUs
+from pages import home, modeling, aboutUsupdate
 
 # Create a dictionary to map page names to their respective modules
 pages = {
     "Home": home,
     "Modeling": modeling,
-    "about Us": aboutUs,
+    "about Us": aboutUsupdate,
 }
 
 # The main function where we will build the actual app
