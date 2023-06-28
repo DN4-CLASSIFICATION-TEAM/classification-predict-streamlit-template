@@ -17,23 +17,23 @@ sys.path.append("./data_cleaner")
 from comet_ml import Experiment
 
 # Create a new Comet experiment
-experiment = Experiment(api_key="O2DQXkha3pCGKtPdWVSve0aKf", project_name="Tweet Classification", workspace="DN4")
+# experiment = Experiment(api_key="O2DQXkha3pCGKtPdWVSve0aKf", project_name="Tweet Classification", workspace="DN4")
 
 # Log an example metric
-experiment.log_metric("accuracy", 0.85)
+# experiment.log_metric("accuracy", 0.85)
 
 # Log example parameters
-experiment.log_parameter("learning_rate", 0.001)
-experiment.log_parameter("batch_size", 32)
+# experiment.log_parameter("learning_rate", 0.001)
+# experiment.log_parameter("batch_size", 32)
 
 # Train our model and log relevant information
 # TODO:
 
 # Log model weights
-experiment.log_model_weights("model", model)
+# experiment.log_model_weights("model", model)
 
 # End the experiment
-experiment.end()
+# experiment.end()
 
 # Vectorizer
 news_vectorizer = open("resources/tfidfvect.pkl", "rb")
