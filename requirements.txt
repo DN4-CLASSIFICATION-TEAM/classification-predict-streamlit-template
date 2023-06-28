@@ -6,3 +6,4 @@ nltk
 scikit-learn
 streamlit
 comet-ml
+contractions
