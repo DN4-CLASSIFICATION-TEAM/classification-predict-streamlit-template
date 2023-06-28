@@ -27,12 +27,12 @@ import joblib
 # from pages import home, modeling, aboutUsupdate, aboutTheApp
 
 # Create a dictionary to map page names to their respective modules
-pages = {
-    "Home": home,
-    "About the App":aboutTheApp,
-    "Modeling": modeling,
-    "about Us": aboutUsupdate,
-}
+#pages = {
+    #"Home": home,
+    #"About the App":aboutTheApp,
+    #"Modeling": modeling,
+    #"about Us": aboutUsupdate,
+#}
 
 # The main function where we will build the actual app
 def main():
