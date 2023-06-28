@@ -40,7 +40,7 @@ with col3:
 	st.write("ghaalibvanderross@sensesolutionse.com")
 
 imi = Image.open("./resources/imgs/Imi.jpeg")
-leh = Image.open("./resources/imgs/Lehlohonolo.jpeg")
+leh = Image.open("./resources/imgs/lehlohonolo.jpeg")
 ori = Image.open("./resources/imgs/Orifuna.jpeg")
 col4, col5, col6 = st.columns(3)
 
@@ -59,6 +59,11 @@ with col6:
 	st.write("Data Engineer")
 	st.write("Orifuna Nemusombori")
 	st.write("orifunanemusombori@sensesolutions.com")
+
+import os
+print(os.path.abspath("Imi.jpeg"))
+print(os.path.abspath("Lehlohonolo.jpeg"))
+print(os.path.abspath("Orifuna.jpeg"))
 
 st.write("Discover the power of data with Sense Solutions- Your partner for unlocking insights from social media.")
 st.write("Contact us today to learn more about our services and how we can help your organization thrive in digital age.")
