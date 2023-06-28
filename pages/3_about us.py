@@ -39,9 +39,9 @@ with col3:
 	st.write("Ghaalib van der Ross")
 	st.write("ghaalibvanderross@sensesolutionse.com")
 
-imi = Image.open("resources/imgs/Imi.jpeg")
-leh = Image.open("resources/imgs/Lehlohonolo.jpeg")
-ori = Image.open("resources/imgs/Orifuna.jpeg")
+imi = Image.open("./resources/imgs/Imi.jpeg")
+leh = Image.open("./resources/imgs/Lehlohonolo.jpeg")
+ori = Image.open("./resources/imgs/Orifuna.jpeg")
 col4, col5, col6 = st.columns(3)
 
 with col4:

@@ -45,8 +45,8 @@ def main():
     col1.image(image)
     col2.markdown("#### We are delighted to present our state-of-the-art web application designed for tweet classification. With our innovative technology, you can effortlessly analyze and categorize tweets based on their sentiments, providing you with valuable insights into public opinions")
     st.info("Our tweet classification web app utilizes advanced machine learning algorithms to accurately determine the sentiment of each tweet. Whether it's positive, negative, or neutral, our model can swiftly classify the sentiment, allowing you to gain a comprehensive understanding of public sentiment on various topics.")    
-    image = Image.open("./resources/imgs/chatbot.png")
-    st.image(image, caption="")
+    image = Image.open("./resources/imgs/chatBot.png")
+    st.image(image)
 
 
 # Required to let Streamlit instantiate our web app.
