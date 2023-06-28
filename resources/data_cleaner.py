@@ -9,7 +9,7 @@ from wordcloud import WordCloud
 
 def remove_noise(text):
     # Replace URLs with "url"
-    text = re.sub(r'http[s]?://(?:[A-Za-z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9A-Fa-f][0-9A-Fa-f]))+', 'http', text)
+    # text = re.sub(r'http[s]?://(?:[A-Za-z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9A-Fa-f][0-9A-Fa-f]))+', 'http', text)
 
     # Replace Twitter handles with "user"
     # text = re.sub(r'@\w+', '', text)
