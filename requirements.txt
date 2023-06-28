@@ -5,3 +5,4 @@ wordcloud
 nltk
 scikit-learn
 streamlit
+comet-ml
