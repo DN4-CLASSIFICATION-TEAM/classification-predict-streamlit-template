@@ -15,6 +15,7 @@ from nltk.corpus import stopwords
 import sys
 sys.path.append("./data_cleaner")
 from comet_ml import Experiment
+nltk.download('stopwords')
 
 # Create a new Comet experiment
 # experiment = Experiment(api_key="O2DQXkha3pCGKtPdWVSve0aKf", project_name="Tweet Classification", workspace="DN4")

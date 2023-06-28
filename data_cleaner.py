@@ -6,6 +6,7 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.probability import FreqDist
 from wordcloud import WordCloud
+nltk.download('stopwords')
 
 def remove_noise(text):
     # Replace URLs with "url"
