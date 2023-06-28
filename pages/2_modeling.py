@@ -51,7 +51,7 @@ def load_classifier(classifier_name):
 
 
 # Load default classifier
-classifier = load_classifier("logistic_regression")
+# classifier = load_classifier("logistic_regression")
 
 
 # Company logo
