@@ -132,6 +132,9 @@ def clean_and_classify_tweets(text):
 
     # Vectorize the cleaned data using your trained vectorizer
     vectorized_data = tweet_cv.transform([cleaned_data]).toarray()
+    
+    classifier_file = f"resources/Logistic_regression.pkl"
+    classifier = joblib.load(open(classifier_file, "rb"))
 
     # Make predictions using the loaded classifier
     predictions = classifier.predict(vectorized_data)
@@ -335,6 +338,9 @@ if selection == "Prediction":
         with st.spinner("Classifying Tweet..."):
             # Transform user input
             vect_text = tweet_cv.transform([tweet_text]).toarray()
+            
+            classifier_file = f"resources/Logistic_regression.pkl"
+            classifier = joblib.load(open(classifier_file, "rb"))
 
             # Make prediction using the selected classifier
             prediction = classifier.predict(vect_text)[0]
