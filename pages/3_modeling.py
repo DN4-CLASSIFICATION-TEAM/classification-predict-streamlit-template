@@ -13,9 +13,10 @@ import re
 import pandas as pd
 from nltk.corpus import stopwords
 import sys
+import seaborn as sns
 sys.path.append("./data_cleaner")
-from comet_ml import Experiment
-nltk.download('stopwords')
+# from comet_ml import Experiment
+# nltk.download('stopwords')
 
 # Create a new Comet experiment
 # experiment = Experiment(api_key="O2DQXkha3pCGKtPdWVSve0aKf", project_name="Tweet Classification", workspace="DN4")
@@ -36,23 +37,28 @@ nltk.download('stopwords')
 # End the experiment
 # experiment.end()
 
-# Vectorizer
-news_vectorizer = open("resources/tfidfvect.pkl", "rb")
-# loading your vectorizer from the pkl file
-tweet_cv = joblib.load(news_vectorizer)
+# Function to load the vectorizer
+@st.cache_data()  # Cache the vectorizer to avoid repeated loading
+def load_vectorizer():
+    vectorizer = joblib.load("resources/tfidfvect.pkl")
+    return vectorizer
 
-# Load your raw data
-raw = pd.read_csv("resources/train.csv")
+# Function to load the raw data
+@st.cache_data  # Cache the raw data to avoid repeated loading
+def load_raw_data():
+    raw_data = pd.read_csv("resources/train.csv", nrows=1000) # Load 1000 rows of the raw data
+    return raw_data
 
 # Function to load a selected classifier
+@st.cache_data()  # Cache the classifier to avoid repeated loading
 def load_classifier(classifier_name):
     classifier_file = f"resources/{classifier_name}.pkl"
     classifier = joblib.load(open(classifier_file, "rb"))
     return classifier
 
-
-# Load default classifier
-# classifier = load_classifier("logistic_regression")
+# Load the vectorizer and raw data
+tweet_cv = load_vectorizer()
+raw = load_raw_data()
 
 
 # Company logo
@@ -71,6 +77,7 @@ def retweet_pie(df):
 
 # Generate word clouds
 def word_cloud(df, num, column):
+    df[column] = df[column].apply(clean_data)  # Clean the text column
     handle_freq2 = nltk.FreqDist(np.hstack(df[df['sentiment'] == 2][column]))
     handle_freq1 = nltk.FreqDist(np.hstack(df[df['sentiment'] == 1][column]))
     handle_freq0 = nltk.FreqDist(np.hstack(df[df['sentiment'] == 0][column]))
@@ -123,95 +130,20 @@ def clean_data(text):
     return cleaned_text
 
 # Function to clean and classify tweets
-def clean_and_classify_tweets(text):
-    # Convert the input to a string
-    text = str(text)
+# def clean_and_classify_tweets(df):
+#     # Clean the text data using your data cleaning function
+#     cleaned_data = df['message'].apply(clean_data)
 
-    # Clean the text data using your data cleaning function
-    cleaned_data = clean_data(text)
+#     # Vectorize the cleaned data using your trained vectorizer
+#     vectorized_data = tweet_cv.transform(cleaned_data).toarray()
 
-    # Vectorize the cleaned data using your trained vectorizer
-    vectorized_data = tweet_cv.transform([cleaned_data]).toarray()
-    
-    classifier_file = f"resources/Logistic_regression.pkl"
-    classifier = joblib.load(open(classifier_file, "rb"))
+#     # Load the classifier
+#     classifier = load_classifier("Logistic_regression")
 
-    # Make predictions using the loaded classifier
-    predictions = classifier.predict(vectorized_data)
+#     # Make predictions using the loaded classifier
+#     predictions = classifier.predict(vectorized_data)
 
-    return predictions[0]
-
-
-
-# clean the data, drop the tweetid column and create a new column with the cleaned tweets
-raw['clean_tweet'] = raw['message'].apply(clean_and_classify_tweets)
-raw = raw.drop("tweetid", axis=1)
-
-# Declare df_train globally
-df_train = None
-
-# Building out the "Information" page
-if selection == "Information":
-    st.title("Insights")
-    st.subheader(
-        "Discover the power of data with Sense Solutions - Your partner for unlocking insights from social media")
-    # Count the number of occurrences for each sentiment
-    sentiment_counts = raw["sentiment"].value_counts()
-
-    # Plot a doughnut chart
-    fig, ax = plt.subplots()
-    ax.pie(sentiment_counts, labels=[sentiment_labels[sentiment]
-    for sentiment in sentiment_counts.index], autopct="%1.1f%%", startangle=90)
-    ax.axis("equal")
-    ax.set_title("Sentiment Distribution")
-
-    # Display the doughnut chart
-    st.pyplot(fig)
-
-    if st.button("Generate Word Clouds"):
-        with st.spinner("Generating Word Clouds..."):
-            # Generate word cloud for each sentiment category
-            sentiment_categories = raw["sentiment"].unique()
-            num_columns = 2  # Number of columns in the subplot grid
-            # Number of rows in the subplot grid
-            num_rows = (len(sentiment_categories) + 1) // num_columns
-
-            fig, axs = plt.subplots(num_rows, num_columns, figsize=(12, 8))
-
-            for i, sentiment in enumerate(sentiment_categories):
-                tweets = raw.loc[raw["sentiment"] == sentiment, "message"]
-                wordcloud = WordCloud(
-                    width=400, height=400, background_color="white").generate(" ".join(tweets))
-                ax = axs[i // num_columns, i % num_columns]
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.set_title(sentiment_labels[sentiment])
-                ax.axis("off")
-
-            # If there are extra subplots, remove them
-            if len(sentiment_categories) < num_rows * num_columns:
-                for j in range(len(sentiment_categories), num_rows * num_columns):
-                    fig.delaxes(axs[j // num_columns, j % num_columns])
-
-            fig.suptitle("Word Clouds for Different Sentiments", fontsize=16)
-            fig.tight_layout(rect=[0, 0, 1, 0.95])
-
-            # Display the combined word clouds
-            st.pyplot(fig)
-
-    # Create a filter for sentiment categories
-    sentiment_filter = st.selectbox(
-        "Filter by Sentiment", ["All"] + list(sentiment_labels.values()))
-
-    # Filter the data based on selected sentiment
-    if sentiment_filter == "All":
-        filtered_data = raw
-    else:
-        sentiment_value = next(
-            key for key, value in sentiment_labels.items() if value == sentiment_filter)
-        filtered_data = raw[raw['sentiment'] == sentiment_value]
-
-    # Display the first 20 rows of the filtered data in a table
-    st.table(filtered_data.head(5))
+#     return predictions
 
 
 def handle(text):
@@ -219,11 +151,7 @@ def handle(text):
     return x
 
 
-raw['Handle'] = raw['message'].apply(handle)
-
-# Function to show data insights
-
-
+# Function to display data insights
 def show_data_insights(df):
     st.subheader("Data Insights")
 
@@ -231,9 +159,81 @@ def show_data_insights(df):
     st.write("Summary Statistics:")
     st.write(df.describe())
 
-    # Display data visualization (e.g., histogram, bar chart, etc.)
-    st.write("Data Visualization:")
-    # Add your visualization code here using matplotlib or any other library
+    # Word clouds for sentiments
+    st.write("Word Clouds for Sentiments:")
+    sentiment_labels = {
+        1: "Positive",
+        -1: "Negative",
+        0: "Neutral",
+        2: "Pro News"
+    }
+    num_words = 10  # Number of words to display in the word cloud
+
+    for sentiment, label in sentiment_labels.items():
+        st.subheader(f"Word Cloud for {label} Sentiment:")
+        filtered_data = df[df['sentiment'] == sentiment]
+        text = " ".join(filtered_data['clean_tweet'])
+        wordcloud = WordCloud(max_words=num_words).generate(text)
+
+        plt.figure(figsize=(8, 8))
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.title(f"Top {num_words} words for {label} Sentiment")
+        plt.axis("off")
+        st.pyplot(plt)
+
+    # Doughnut chart for sentiments
+    st.write("Doughnut Chart for Sentiments:")
+    sentiment_counts = df['sentiment'].value_counts()
+    labels = [sentiment_labels[sentiment] for sentiment in sentiment_counts.index]
+    values = sentiment_counts.values
+
+    fig, ax = plt.subplots()
+    ax.pie(values, labels=labels, autopct='%.2f%%', startangle=90, colors=sns.color_palette('Set3'))
+    ax.axis('equal')
+    ax.set_title("Sentiment Distribution")
+
+    st.pyplot(fig)
+
+# Drop the "tweetid" column
+raw = raw.drop("tweetid", axis=1)
+
+
+# Building out the "Information" page
+if selection == "Information":
+    st.title("Insights")
+    st.subheader("Discover the power of data with Sense Solutions - Your partner for unlocking insights from social media")
+
+    st.markdown("## Data Insights")
+    st.write("Our analysis of the dataset revealed valuable insights about sentiment distribution in social media. Here are some key findings:")
+
+    image = Image.open("./resources/imgs/len.png")
+    st.image(image, caption="", width=800)
+    
+    # Display the sentiment distribution doughnut chart
+    st.markdown("### Sentiment Distribution")
+    # st.pyplot(fig)
+    
+    image = Image.open("./resources/imgs/dist.png")
+    st.image(image, caption="", width=800)
+
+    # Display word clouds for each sentiment
+    st.markdown("### Word Clouds")
+    st.write("Word clouds provide a visual representation of the most frequently occurring words associated with each sentiment.")
+
+    image = Image.open("./resources/imgs/cloud.png")
+    st.image(image, caption="", width=800)
+
+    st.markdown("## About Our Solutions")
+    st.write("At Sense Solutions, we specialize in unlocking insights from social media data. With our advanced data analytics techniques and machine learning models, we help businesses harness the power of social media to drive informed decision-making.")
+
+    st.write("Our solutions include:")
+    st.markdown("- Sentiment Analysis: Gain a deep understanding of public sentiment towards your brand, products, or services.")
+    st.markdown("- Trend Analysis: Identify emerging trends and topics relevant to your industry.")
+    st.markdown("- Influencer Identification: Find influential voices in your target audience to amplify your brand reach.")
+    st.markdown("- Customer Segmentation: Divide your customer base into meaningful segments for targeted marketing campaigns.")
+    st.markdown("- Social Media Monitoring: Monitor and track conversations about your brand in real-time.")
+
+    st.write("Partner with us to unlock the power of social media data and make data-driven decisions for your business.")
 
 
 # Function to get most retweeted usernames
@@ -250,97 +250,40 @@ def get_most_retweeted_username(df, top_n=1):
         top_usernames = username_counts.head(top_n)
 
         # Create a pie chart to visualize the retweet counts
-        plt.figure(figsize=(8, 8))
-        plt.pie(top_usernames.values, labels=top_usernames.index, autopct='%.2f%%')
-        plt.title(f'Top {top_n} Usernames with the Most Retweets')
-        plt.axis('equal')
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.pie(top_usernames.values, labels=top_usernames.index, autopct='%.2f%%')
+        ax.set_title(f'Top {top_n} Usernames with the Most Retweets')
+        ax.axis('equal')
 
         # Display the chart
-        st.subheader(f'Top {top_n} Usernames with the Most Retweets')
-        st.pyplot(plt)
+        st.pyplot(fig)
     else:
         st.write('No retweets with usernames found.')
 
-# Find duplicate messages
-df_retweet = raw[raw['message'].duplicated()].reset_index(drop=True)
+
 # Building out the predication page
 if selection == "Prediction":
-    st.title("Tweet Classifer prod by Sense Solutions")
+    st.title("Tweet Classifer powered by Sense Solutions")
     st.subheader("Climate change tweet classification")
-    st.subheader("Enter a tweet to be classified or upload your training data and test data to get accurate sentiment predictions")
-    st.info("Prediction with Machne Learning Models")
+    st.subheader("Enter a tweet to be classified or upload test data for accurate sentiment predictions")
 
+    st.info("Prediction with Machne Learning Models")
+    
+     # Creating a text box for user input
+    tweet_text = st.text_area("Enter Text", "Type Here")
+    
+    st.info("Select one model for prediction")
     # Select classifier
     classifier_name = st.selectbox(
-        "Select Classifier", ["Logistic_regression", "MNB", "DT", "SVC"])
+        "Select Classifier", ["Logistic_regression", "decision_tree", "knn", "random_forest"])
 
     # Load classifier
     classifier = load_classifier(classifier_name)
-
-     # Create a file uploader for test data
-    uploaded_file = st.file_uploader("Upload Test Data (CSV)", type="csv")
-
-    # Check if a file is uploaded
-    if uploaded_file is not None:
-        with st.spinner("Uploading..."):
-            # Read the uploaded CSV file
-            df_test = pd.read_csv(uploaded_file)
-
-            # Display the uploaded test data
-            st.subheader("Uploaded Test Data")
-            st.dataframe(df_test)
-
-            # if st.button("Classify Your Data"):
-            #     # Clean and classify the tweets
-            #     predictions = clean_and_classify_tweets(df_test['message'])
-
-            #     # Add the predictions as a new column in the DataFrame
-            #     df_test['sentiment'] = predictions
-
-            #     # Display the pie chart of sentiments
-            #     st.subheader("Sentiment Split of Your Data")
-            #     sentiment_counts = df_test['sentiment'].value_counts()
-            #     st.plotly_chart(sentiment_counts.plot.pie(autopct="%.2f%%", figsize=(6, 6)))
-
-            #     # Display the top words word clouds
-            #     st.subheader("Top Words in Your Data")
-            #     # word_cloud(df_test, 20, 'message')
-
-            #     # Display the username with the most retweets
-            #     st.subheader("Users with the Most Retweets")
-            #     get_most_retweeted_username(df_test, top_n=20)
-
-    col1, col2 = st.columns(2)
-    
-    if col1.button("Data insights"):
-        if 'df_test' in locals():
-            if st.button("Classify Your Data"):
-                # Display the pie chart of sentiments
-                st.subheader("Sentiment Split of Test Data")
-                sentiment_counts = df_test['sentiment'].value_counts()
-                st.plotly_chart(sentiment_counts.plot.pie(autopct="%.2f%%", figsize=(6, 6)))
-
-                # Display the top words word clouds
-                st.subheader("Top Words in Test Data")
-                word_cloud(df_test, 20, 'message')
-
-                # Display the username with the most retweets
-                st.subheader("Users with the Most Retweets")
-                get_most_retweeted_username(df_test, top_n=20)
-
-    if col2.button("Get Retweets"):
-        get_most_retweeted_username(raw, top_n=20)
-
-    # Creating a text box for user input
-    tweet_text = st.text_area("Enter Text", "Type Here")
 
     if st.button("Classify"):
         with st.spinner("Classifying Tweet..."):
             # Transform user input
             vect_text = tweet_cv.transform([tweet_text]).toarray()
-            
-            classifier_file = f"resources/Logistic_regression.pkl"
-            classifier = joblib.load(open(classifier_file, "rb"))
 
             # Make prediction using the selected classifier
             prediction = classifier.predict(vect_text)[0]
@@ -350,5 +293,51 @@ if selection == "Prediction":
                 sentiment_labels[prediction]))
 
             # Generate word cloud for the entered text
-            word_cloud(df_test, 20, 'message')
+            wordcloud = WordCloud().generate(tweet_text)
+
+    
+
+     # Create a file uploader for test data
+    uploaded_file = st.file_uploader("Upload Test Data (CSV)", type="csv")
+
+    # Check if a file is uploaded
+    if uploaded_file is not None:
+        with st.spinner("Uploading..."):
+            col1, col2 = st.columns(2)
+
+            # Read the uploaded CSV file
+            df_test = pd.read_csv(uploaded_file)
+
+            # Display the uploaded test data
+            st.subheader("Uploaded Test Data successfully")
+
+            if col1.button("Classify Your Data"):
+                # Clean and classify the tweets
+                df_test['clean_tweet'] = df_test['message'].apply(clean_data)
+                
+                # Apply vectorization to the 'clean_tweet' column
+                vectorized_data = tweet_cv.transform(df_test['clean_tweet']).toarray()
+                
+                # Make predictions using the selected classifier
+                predictions = classifier.predict(vectorized_data)
+
+                # Add the predictions as a new column in the DataFrame
+                df_test['sentiment'] = predictions
+
+                st.dataframe(df_test.head(5))
+
+                st.subheader("Sentiment Split of Your Data")
+                sentiment_counts = df_test['sentiment'].map(sentiment_labels).value_counts()
+                fig, ax = plt.subplots(figsize=(6, 6))
+                ax.pie(sentiment_counts, labels=sentiment_counts.index, autopct="%.2f%%")
+                st.pyplot(fig)
+
+                # Display the top words word clouds
+                st.subheader("Word Clouds of Your Data")
+                word_cloud(df_test, 10, 'clean_tweet')
+
+
+            if col2.button("Get Retweets"):
+                st.subheader("Users with the Most Retweets")
+                get_most_retweeted_username(df_test, top_n=20)
 
