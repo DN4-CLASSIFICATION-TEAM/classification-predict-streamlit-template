@@ -40,7 +40,7 @@ sys.path.append("./data_cleaner")
 # Function to load the vectorizer
 @st.cache_data()  # Cache the vectorizer to avoid repeated loading
 def load_vectorizer():
-    vectorizer = joblib.load("resources/tfidfvect.pkl")
+    vectorizer = joblib.load("resources/vectorizer.pkl")
     return vectorizer
 
 # Function to load the raw data
