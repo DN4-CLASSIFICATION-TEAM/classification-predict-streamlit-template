@@ -7,3 +7,4 @@ scikit-learn
 streamlit
 comet-ml
 contractions
+seaborn
